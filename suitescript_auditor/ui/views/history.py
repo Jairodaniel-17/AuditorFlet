@@ -1,48 +1,35 @@
-"""History view."""
+"""History view for Tkinter."""
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
-import flet as ft
-
-from .common import make_view
+import tkinter as tk
+from tkinter import ttk
 
 
-def build_history(page: ft.Page, context) -> ft.View:
-    rows = []
+def build(parent: tk.Widget, context) -> ttk.Frame:
+    frame = ttk.Frame(parent, padding=20)
+    ttk.Label(frame, text="History", font=("Segoe UI", 18, "bold")).pack(anchor="w")
+
+    columns = ("project", "status", "overall", "timestamp")
+    tree = ttk.Treeview(frame, columns=columns, show="headings", height=15)
+    for col in columns:
+        tree.heading(col, text=col.title())
+        tree.column(col, width=180)
+    tree.pack(fill="both", expand=True, pady=10)
+
     for job in context.job_queue.list_jobs():
-        docs_path = Path(job.results["docs_path"]) if job.results else None
         overall = "-"
-        if docs_path and (docs_path / "index.json").exists():
-            data = json.loads((docs_path / "index.json").read_text(encoding="utf-8"))
-            overall = f"{data.get('summary_scores', {}).get('overall', 0):.1f}"
-        rows.append(
-            ft.DataRow(
-                cells=[
-                    ft.DataCell(ft.Text(job.project_name)),
-                    ft.DataCell(ft.Text(job.created_at.isoformat())),
-                    ft.DataCell(ft.Text(job.status.value)),
-                    ft.DataCell(ft.Text(overall)),
-                ]
-            )
+        if job.results.get("docs_path"):
+            overall = job.results.get("summary_score", "-")
+        tree.insert(
+            "",
+            tk.END,
+            values=(job.project_name, job.status.value.title(), overall, job.created_at.strftime("%Y-%m-%d %H:%M")),
         )
-    table = ft.DataTable(
-        columns=[
-            ft.DataColumn(ft.Text("Project")),
-            ft.DataColumn(ft.Text("Timestamp")),
-            ft.DataColumn(ft.Text("Status")),
-            ft.DataColumn(ft.Text("Overall Score")),
-        ],
-        rows=rows,
-    )
-    body = ft.Column(
-        controls=[
-            ft.Text("Run History", size=22, weight="bold"),
-            table,
-            ft.TextButton("Export history", on_click=lambda _: None),
-        ],
-        expand=True,
-    )
-    return make_view("/history", ["Processing Center", "History"], body)
+
+    ttk.Label(
+        frame,
+        text="Lista de ejecuciones previas. Ejecuta un nuevo análisis para agregar más entradas.",
+        foreground="#555555",
+    ).pack(anchor="w")
+    return frame

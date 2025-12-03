@@ -1,6 +1,6 @@
 # SuiteScript Auditor
 
-SuiteScript Auditor is a desktop application (Flet) that analyzes NetSuite SuiteScript projects, generates `/Docs` with audit + summary artefacts, and surfaces risks through a corporate UI.
+SuiteScript Auditor is a desktop application (Tkinter) that analyzes NetSuite SuiteScript projects, generates `/Docs` with audit + summary artefacts, and surfaces risks through a corporate UI.
 
 ## Features
 

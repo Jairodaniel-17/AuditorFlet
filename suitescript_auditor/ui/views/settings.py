@@ -1,98 +1,53 @@
-"""Settings view."""
+"""Settings view implemented with Tkinter."""
 
 from __future__ import annotations
 
-import flet as ft
+import tkinter as tk
+from tkinter import ttk, messagebox
 
 from ...core.config.defaults import defaults
-from ..shell import primary_action
-from .common import make_view
 
 
-def build_settings(page: ft.Page, context) -> ft.View:
-    oci_section = ft.Card(
-        content=ft.Container(
-            padding=20,
-            content=ft.Column(
-                controls=[
-                    ft.Text("OCI", size=18, weight="bold"),
-                    ft.TextField(label="Region/Endpoint", value=defaults.region),
-                    ft.TextField(label="Model name", value=defaults.llm_model),
-                    ft.Dropdown(
-                        label="Auth method",
-                        options=[ft.dropdown.Option("config file"), ft.dropdown.Option("instance principal")],
-                        value=defaults.auth_method,
-                    ),
-                    primary_action("Test connection", lambda _: None),
-                ]
-            ),
-        )
+def build(parent: tk.Widget, context) -> ttk.Frame:
+    frame = ttk.Frame(parent, padding=20)
+    ttk.Label(frame, text="Settings", font=("Segoe UI", 18, "bold")).grid(row=0, column=0, sticky="w")
+
+    oci = ttk.LabelFrame(frame, text="OCI", padding=10)
+    oci.grid(row=1, column=0, sticky="we", pady=10)
+    region_var = tk.StringVar(value=defaults.region)
+    model_var = tk.StringVar(value=defaults.llm_model)
+    ttk.Label(oci, text="Region/Endpoint").grid(row=0, column=0, sticky="w")
+    ttk.Entry(oci, textvariable=region_var, width=30).grid(row=1, column=0, sticky="w")
+    ttk.Label(oci, text="Model name").grid(row=2, column=0, sticky="w", pady=(8, 0))
+    ttk.Entry(oci, textvariable=model_var, width=30).grid(row=3, column=0, sticky="w")
+
+    ttk.Button(oci, text="Test connection", command=lambda: messagebox.showinfo("Settings", "Conexión simulada OK")).grid(
+        row=4, column=0, pady=10, sticky="w"
     )
 
-    limits_section = ft.Card(
-        content=ft.Container(
-            padding=20,
-            content=ft.Column(
-                controls=[
-                    ft.Text("LLM limits", size=18, weight="bold"),
-                    ft.TextField(label="Max cost per job (USD)", value=str(defaults.max_cost_per_job)),
-                    ft.TextField(label="Max tokens per file", value="2000"),
-                    ft.Dropdown(
-                        label="Tier presets",
-                        options=[
-                            ft.dropdown.Option("Economic"),
-                            ft.dropdown.Option("Normal"),
-                            ft.dropdown.Option("Strict"),
-                        ],
-                        value="Economic",
-                    ),
-                ]
-            ),
-        )
+    git = ttk.LabelFrame(frame, text="Git", padding=10)
+    git.grid(row=2, column=0, sticky="we", pady=10)
+    ttk.Label(git, text="Proveedor por defecto:").grid(row=0, column=0, sticky="w")
+    ttk.Combobox(git, values=["GitHub", "GitLab", "Bitbucket"], state="readonly").grid(row=1, column=0, sticky="w")
+    ttk.Button(git, text="Probar push", command=lambda: messagebox.showinfo("Settings", "Push simulado")).grid(
+        row=2, column=0, pady=5, sticky="w"
     )
 
-    git_section = ft.Card(
-        content=ft.Container(
-            padding=20,
-            content=ft.Column(
-                controls=[
-                    ft.Text("Git", size=18, weight="bold"),
-                    ft.TextField(label="Provider", value="GitHub"),
-                    ft.TextField(label="Default remote", value="origin"),
-                    ft.TextField(label="Token storage", value="Stored in keyring"),
-                    primary_action("Test push permissions", lambda _: None),
-                ]
-            ),
-        )
+    limits = ttk.LabelFrame(frame, text="LLM Limits", padding=10)
+    limits.grid(row=3, column=0, sticky="we", pady=10)
+    ttk.Label(limits, text="Max cost per job (USD)").grid(row=0, column=0, sticky="w")
+    ttk.Entry(limits, width=10, textvariable=tk.StringVar(value=str(defaults.max_cost_per_job))).grid(
+        row=1, column=0, sticky="w"
     )
+    ttk.Label(limits, text="Max tokens per file").grid(row=2, column=0, sticky="w", pady=(8, 0))
+    ttk.Entry(limits, width=10, textvariable=tk.StringVar(value="2000")).grid(row=3, column=0, sticky="w")
 
-    ui_section = ft.Card(
-        content=ft.Container(
-            padding=20,
-            content=ft.Column(
-                controls=[
-                    ft.Text("UI", size=18, weight="bold"),
-                    ft.Dropdown(label="Theme", options=[ft.dropdown.Option("Light")], value="Light"),
-                    ft.Dropdown(label="Primary color", options=[ft.dropdown.Option("Red")], value="Red"),
-                    ft.Dropdown(label="Accent color", options=[ft.dropdown.Option("Blue")], value="Blue"),
-                    ft.Slider(label="Font size", min=12, max=18, divisions=6, value=14),
-                ]
-            ),
-        )
-    )
+    ui_section = ttk.LabelFrame(frame, text="UI", padding=10)
+    ui_section.grid(row=4, column=0, sticky="we", pady=10)
+    ttk.Label(ui_section, text="Theme").grid(row=0, column=0, sticky="w")
+    ttk.Combobox(ui_section, values=["Light"], state="readonly").grid(row=1, column=0, sticky="w")
+    ttk.Label(ui_section, text="Font Size").grid(row=2, column=0, sticky="w", pady=(8, 0))
+    ttk.Scale(ui_section, from_=12, to=18, orient="horizontal").grid(row=3, column=0, sticky="we")
 
-    body = ft.Column(
-        controls=[
-            oci_section,
-            limits_section,
-            git_section,
-            ui_section,
-        ],
-        scroll="auto",
-    )
-    return make_view(
-        "/settings",
-        ["Processing Center", "Settings"],
-        body,
-        actions=lambda: [primary_action("Back", lambda _: page.go("/"))],
-    )
+    frame.columnconfigure(0, weight=1)
+    return frame

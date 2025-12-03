@@ -1,53 +1,54 @@
-"""Docs Browser view."""
+"""Docs Browser view for Tkinter."""
 
 from __future__ import annotations
 
 from pathlib import Path
-
-import flet as ft
-
-from .common import make_view
+import tkinter as tk
+from tkinter import ttk
 
 
-def build_docs_browser(page: ft.Page, context) -> ft.View:
-    jobs = [job for job in context.job_queue.list_jobs() if job.results]
-    if not jobs:
-        return make_view("/docs", ["Processing Center", "Docs Browser"], ft.Text("Generate docs to browse them."))
-    docs_path = Path(jobs[-1].results["docs_path"])
+def build(parent: tk.Widget, context) -> ttk.Frame:
+    frame = ttk.Frame(parent, padding=20)
+    ttk.Label(frame, text="Docs Browser", font=("Segoe UI", 18, "bold")).pack(anchor="w")
+
+    job = _latest_completed_job(context)
+    if not job:
+        ttk.Label(frame, text="No hay documentación generada aún.").pack(anchor="w", pady=20)
+        return frame
+
+    docs_path = Path(job.results.get("docs_path", ""))
     summary_dir = docs_path / "summary"
-    files = sorted(summary_dir.rglob("*.md"))
-    if not files:
-        return make_view("/docs", ["Processing Center", "Docs Browser"], ft.Text("No summary markdown files"))
+    if not summary_dir.exists():
+        ttk.Label(frame, text="No se encontró Docs/summary.").pack(anchor="w", pady=20)
+        return frame
 
-    selected = files[0]
-    file_list = ft.ListView(
-        controls=[
-            ft.ListTile(title=ft.Text(str(path.relative_to(summary_dir))), on_click=lambda e, p=path: None)
-            for path in files
-        ],
-        expand=True,
-    )
-    viewer = ft.Markdown(selected.read_text(encoding="utf-8"), expand=True, selectable=True)
-    body = ft.Row(
-        controls=[
-            ft.Container(width=320, bgcolor="#FFFFFF", padding=12, content=file_list),
-            ft.Column(
-                controls=[
-                    ft.Row(
-                        controls=[
-                            ft.Dropdown(
-                                label="Folder",
-                                options=[ft.dropdown.Option("summary"), ft.dropdown.Option("audit")],
-                                value="summary",
-                            ),
-                            ft.TextField(label="Search function", hint_text="Type to search...", expand=True),
-                        ]
-                    ),
-                    viewer,
-                ],
-                expand=True,
-            ),
-        ],
-        expand=True,
-    )
-    return make_view("/docs", ["Processing Center", "Docs Browser"], body)
+    body = ttk.Frame(frame)
+    body.pack(fill="both", expand=True)
+
+    listbox = tk.Listbox(body, width=40)
+    listbox.pack(side="left", fill="y")
+    files = sorted(summary_dir.rglob("*.summary.md"))
+    for file in files:
+        listbox.insert("end", str(file.relative_to(summary_dir)))
+
+    text = tk.Text(body)
+    text.pack(side="left", fill="both", expand=True, padx=10)
+
+    def display_file(event=None):
+        selection = listbox.curselection()
+        if not selection:
+            return
+        selected = files[selection[0]]
+        text.configure(state="normal")
+        text.delete("1.0", "end")
+        text.insert("end", selected.read_text(encoding="utf-8"))
+        text.configure(state="disabled")
+
+    listbox.bind("<<ListboxSelect>>", display_file)
+    ttk.Label(frame, text="Explora Markdown generados. Usa File Review para detalles completos.").pack(anchor="w", pady=10)
+    return frame
+
+
+def _latest_completed_job(context):
+    jobs = [job for job in context.job_queue.list_jobs() if job.status.name == "COMPLETED"]
+    return jobs[-1] if jobs else None
