@@ -1,0 +1,13 @@
+# Summary - {{ path }}
+
+{{ overview }}
+
+## Entry Points
+{% for entry in entry_points %}
+- **{{ entry.name }}** ({{ entry.lines }}) - {{ entry.role }}
+{% endfor %}
+
+## Functions
+{% for fn in functions %}
+- **{{ fn.name }}** ({{ fn.kind }}) lines {{ fn.lines }} - {{ fn.role }}
+{% endfor %}

@@ -1,0 +1,17 @@
+[project]
+name = "suiteauditor"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flet",
+    "pydantic",
+    "jinja2",
+    "keyring",
+    "langchain",
+    "langchain-oci",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]

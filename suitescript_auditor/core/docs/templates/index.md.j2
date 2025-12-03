@@ -1,0 +1,13 @@
+# SuiteScript Auditor Report - {{ project.name }}
+
+Generated on {{ project.timestamp }}
+
+## Score Summary
+
+- Overall: {{ summary_scores.overall }}
+- Files analyzed: {{ counts.files }}
+
+## Top Hotspots
+{% for hotspot in top_hotspots %}
+- {{ hotspot.file }} :: {{ hotspot.title }} ({{ hotspot.severity }})
+{% endfor %}

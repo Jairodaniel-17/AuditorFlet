@@ -1,0 +1,20 @@
+# Audit - {{ path }}
+
+**Score**: {{ score.overall }}/10  
+**Script Type**: {{ script_type }}  
+**API Version**: {{ api_version }}
+
+{% for hotspot in hotspots %}
+## {{ loop.index }}. {{ hotspot.title }} ({{ hotspot.severity }})
+
+Lines {{ hotspot.location.startLine }}-{{ hotspot.location.endLine }}
+
+```
+{{ hotspot.evidence_excerpt | join("\n") }}
+```
+
+Recommendations:
+{% for rec in hotspot.recommendations %}
+- {{ rec }}
+{% endfor %}
+{% endfor %}

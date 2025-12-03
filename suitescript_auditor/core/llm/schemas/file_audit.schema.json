@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FileAudit",
+  "type": "object",
+  "properties": {
+    "path": {"type": "string"},
+    "hash": {"type": "string"},
+    "scriptType": {"type": "string"},
+    "apiVersion": {"type": "string"},
+    "score_1_10": {
+      "type": "object",
+      "properties": {
+        "overall": {"type": "number"},
+        "risk": {"type": "number"},
+        "clean_code": {"type": "number"},
+        "quality": {"type": "number"},
+        "flexibility": {"type": "number"}
+      },
+      "required": ["overall"]
+    },
+    "hotspots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "severity": {"type": "string"},
+          "score_1_10": {"type": "number"},
+          "title": {"type": "string"},
+          "location": {
+            "type": "object",
+            "properties": {
+              "startLine": {"type": "integer"},
+              "endLine": {"type": "integer"},
+              "symbol": {"type": "string"}
+            },
+            "required": ["startLine", "endLine"]
+          },
+          "snippet_id": {"type": "string"},
+          "evidence_excerpt": {"type": "array", "items": {"type": "string"}},
+          "recommendations": {"type": "array", "items": {"type": "string"}},
+          "verified": {"type": "boolean"}
+        },
+        "required": ["severity", "score_1_10", "title", "location", "snippet_id"]
+      }
+    },
+    "netsuite_specific": {"type": "array", "items": {"type": "string"}},
+    "fix_plan": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["path", "hash", "score_1_10", "hotspots"]
+}

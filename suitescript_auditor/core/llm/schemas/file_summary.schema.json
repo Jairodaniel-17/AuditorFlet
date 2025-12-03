@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FileSummary",
+  "type": "object",
+  "properties": {
+    "path": {"type": "string"},
+    "hash": {"type": "string"},
+    "scriptType": {"type": "string"},
+    "apiVersion": {"type": "string"},
+    "overview": {"type": "string"},
+    "entry_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "signature": {"type": "string"},
+          "lines": {"type": "string"},
+          "role": {"type": "string"}
+        },
+        "required": ["name", "lines"]
+      }
+    },
+    "functions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "kind": {"type": "string"},
+          "signature": {"type": "string"},
+          "lines": {"type": "string"},
+          "role": {"type": "string"}
+        },
+        "required": ["name"]
+      }
+    },
+    "modules_used": {"type": "array", "items": {"type": "string"}},
+    "call_graph_lite": {
+      "type": "array",
+      "items": {"type": "object", "properties": {"from": {"type": "string"}, "to": {"type": "string"}}}
+    }
+  },
+  "required": ["path", "hash", "overview"]
+}
